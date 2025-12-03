@@ -23,3 +23,6 @@ image_organizer.db
 
 # Personal documents (may contain sensitive info)
 *.docx
+
+# Documentation (local reference only)
+WHAT-TO-COMMIT.md
