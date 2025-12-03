@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.dylib
+.venv/
+
+# Byte-compiled / cache
+.mypy_cache/
+.pytest_cache/
+
+# Editors
+.vscode/
+.idea/
+
+# Data & artifacts
+storage/
+image_organizer.db
+*.log
+
+# Environment
+.env
+
+# Personal documents (may contain sensitive info)
+*.docx

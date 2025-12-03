@@ -1,0 +1,65 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'AI Image Organizer - AWS App Runner (Serverless, Free Tier Eligible)'
+
+Parameters:
+  GitHubConnectionArn:
+    Type: String
+    Description: ARN of GitHub connection (create via AWS Console > App Runner > Connections)
+  
+  RepositoryUrl:
+    Type: String
+    Default: https://github.com/yourusername/image-organizer
+    Description: GitHub repository URL
+  
+  Branch:
+    Type: String
+    Default: main
+    Description: Git branch to deploy
+
+Resources:
+  AppRunnerService:
+    Type: AWS::AppRunner::Service
+    Properties:
+      ServiceName: ai-image-organizer
+      SourceConfiguration:
+        AuthenticationConfiguration:
+          ConnectionArn: !Ref GitHubConnectionArn
+        CodeRepository:
+          RepositoryUrl: !Ref RepositoryUrl
+          SourceCodeVersion:
+            Type: BRANCH
+            Value: !Ref Branch
+          CodeConfiguration:
+            ConfigurationSource: API
+            CodeConfigurationValues:
+              Runtime: PYTHON_3
+              BuildCommand: |
+                pip install -r requirements.txt
+              StartCommand: uvicorn backend.app.main:app --host 0.0.0.0 --port 8000
+              RuntimeEnvironmentVariables:
+                - Name: CLIP_DEVICE
+                  Value: cpu
+                - Name: USE_CLOUDINARY
+                  Value: "true"
+      InstanceConfiguration:
+        Cpu: "0.25 vCPU"  # Free tier: 750 hours/month
+        Memory: "0.5 GB"   # Free tier: 750 hours/month
+      AutoScalingConfigurationArn: !Ref AutoScalingConfig
+
+  AutoScalingConfig:
+    Type: AWS::AppRunner::AutoScalingConfiguration
+    Properties:
+      AutoScalingConfigurationName: ai-image-organizer-autoscaling
+      MinSize: 1
+      MaxSize: 2
+      MaxConcurrency: 10
+
+Outputs:
+  ServiceUrl:
+    Description: App Runner service URL
+    Value: !GetAtt AppRunnerService.ServiceUrl
+  
+  ServiceArn:
+    Description: App Runner service ARN
+    Value: !GetAtt AppRunnerService.ServiceArn
+
